@@ -1,0 +1,718 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc} %input 
+\usepackage[spanish]{babel} %language
+\usepackage{indentfirst} %first line of a par indented
+\usepackage{listings} %inserting code
+\usepackage{enumitem} %custom lists
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{hyperref} %reference other places, URL, etc 
+\usepackage[most]{tcolorbox} %Custom boxes
+\usepackage{multicol} %mutiple columns on a single paper
+\usepackage{lipsum} %text filler
+\usepackage{fancyhdr} %custom paper layout
+\usepackage{tikz} %custom figures
+\usepackage{adjustbox} %Cajas bro
+\renewcommand{\baselinestretch}{1.2}
+
+\newcommand\ChangeRT[1]{\noalign{\hrule height #1}}
+\hypersetup{
+	colorlinks=true,
+	citecolor=black,
+	filecolor=black,
+	linkcolor=black,
+	urlcolor=black
+}
+
+\title{Práctica PS-ECI: Procesador Simple - Estructura de Computadores I}
+\author{
+	Seguí Vives, Mateu\\
+	\textit{mateufassers6b@gmail.com}\\
+	\texttt{20549548R}
+	\and
+	Palmer Pérez, Rubén\\
+	\textit{ruben.palmer1@estudiant.uib.cat}\\
+	\texttt{43474448D}
+	\and
+	\\Curso 2019-2020\\
+	\texttt{Estructura de Computadores I - Grupo (\textbf{numero de grupo})}
+}
+\date{\today}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Práctica PS-ECI: Procesador Simple}
+\rfoot{\thepage}
+
+\begin{document}
+	\maketitle
+	\thispagestyle{empty}
+	\newpage
+	
+	\thispagestyle{empty}
+	\tableofcontents
+	\newpage
+	
+	\section{Introduction}
+	En esta práctica se nos presenta con el reto de emular una máquina llamada \textit{PS-ECI (Procesador Simple - Estructura de Computadores I)} en el \textbf{68K} usando los conocimientos que hemos ido adquiriendo a lo largo de nuestro curso.\\
+	\\
+	Las instrucciones y registros de la \textit{PS-ECI} son de 16bits. A lo largo de esta documentacion, a la hora de hablar sobre registros emulados, direcciones emuladas, etc, se usara el pronombre \textbf{e}.
+	\subsection{Registros e Instrucciones}
+	\noindent A continuacion se mostraran los registros que tiene esta máquina y sus respectivas funciones:
+	\begin{itemize}
+		\item \textbf{T0, T1 -} Propio de operaciones de tipo \textbf{ALU} e interfaz con a memoria principal.
+		\item \textbf{R2, R3, R4, R5 -} De uso general ademas de usarse en algunas operaciones de tipo \textbf{ALU}.
+		\item \textbf{B6, B7 -} Registros de direcciones usados en algunas instrucciones mediante el direccionamiento indirecto.
+		\item \textbf{EIR -} Registro de instrucción.
+		\item \textbf{EPC -} Contador de programa.
+		\item \textbf{ESR -} Registro de estado que guarda los flags \textit{Zero}, \textit{Negative} y \textit{Carry} tal que: (00000000 00000ZNC).	
+	\end{itemize}	
+	
+	\subsection{Ejecución de instrucciones}
+	Debemos simular cada uno de los pasos que una maquina debe hacer a la hora de ejecutar cualquier instrucción. Será necesario, pues, emular la fase de fect, decodificación y la propia ejecución
+	\subsubsection{\textit{fetch}}
+	
+	Empezando con la fase de \textit{fetch}, tenemos el contador de programa \textbf{EPC} que apunta a la siguiente instrucción. Sin embargo hay que tener en cuenta que la \textit{SP-ECI} trabaja con registros de 16bits mientras que la maquina del \textit{68K} trabaja con bytes. Para arreglar estre problema, \textbf{multiplicaremos por 2 nuestro EPC}. Una vez tenemos la direccion de la siguiente instruccion, podemos buscarla en la memoria emulada \textbf{EPROG} y la transferimos a \textbf{EIR}
+	
+	\newpage
+	\subsubsection{\textit{decodificación}}
+	En la decodoficación de la instrucción se mira el valor de la instrucción bit a bit de izquierda a derecha y según esos valores va saltando  a la instrucción correspondiente. 
+
+	
+    
+	\subsubsection{\textit{ejecución}}
+	Según el valor que nos devuelva la fase de \textit{decodificación}, se ejecutara una de las siguientes instrucciones:
+	\begin{itemize}
+	    \item \textbf{0. EXIT: }Detiene la máquina
+	    \item \textbf{1. COPY: }Carga el contenido de cualquier eregistro $<b>$ a otro eregistro $<c>$
+	    \item \textbf{2. ADD: }Suma los contenidos de dos eregistros $<a>$ y $<b>$ y guarda el resultado en el eregistro $<c>$
+	    \item \textbf{3. SUB: }Resta los contenidos de dos eregistros $<a>$ y $<b>$ y guarda el resultado en el eregistro $<c>$
+	    \item \textbf{4. AND: }Realiza la \textit{AND} bit a bit lógica entre los eregistros $<b>$ y $<c>$ y el resultado es guardado en el eregistro $<c>$
+	    \item \textbf{5. NOT: }Realiza la \textit{NOT} bit a bit lógica del eregistro $<c>$ y el resultado es guardado en si mísmo.
+	    \item \textbf{6. STC: }Guarda una constante \textbf{k} con extensión de signo en un eregistro $<c>$
+	    \item \textbf{7. LOA: }Guarda el contenido de una edirección \textbf{M} en un eregistro \textbf{T0} o \textbf{T1} (dependendiendo de una variable \textbf{i} codificada en la instrucción)  
+	    \item \textbf{8. LOAI: }
+	    Guarda el contenido del contenido del eregistro \textbf{B6} o \textbf{B7} (dependiendo de una variable \textbf{j} codificada en la instrucción) en el eregistro \textbf{T0}
+	    \item \textbf{9. STO: }Guarda el contenido de un eregistro \textbf{T0} o \textbf{T1} (dependendiendo de una variable \textbf{i} codificada en la instrucción) en la edirección \textbf{M}
+	    \item \textbf{10. STOI: } Guarda el contenido del eregistro \textbf{T0} en el contenido de \textbf{B6} o \textbf{B7} (dependiendo de una variable \textbf{j} codificada en la instrucción)
+	    \item \textbf{11. BRI: } Branch incondicional dado por una edirección \textbf{M} 
+	    \item \textbf{12. BRC: }Branch condicional dado por una edirección \textbf{M} y el eflag \textbf{C}
+	    \item \textbf{13. BRZ: }Branch condicional dado por una edirección \textbf{M} y el eflag \textbf{Z}
+	\end{itemize}
+	\section{Rutina de decodificación}
+	Para decodificar las instrucciones, usamos una subrutina de libreria \textbf{DECOD} que usa la instrucción \textbf{BTST} para mirar el valor del bit actual en orden del más significativo al menos significativo. Dependiendo del valor del bit, se hace el salto correspondiente a la siguiente etiqueta hasta llegar a la que coincide con el valor de la instrucción. Previamente, se reservará un espacio en la pila para que la subrutina nos devuelva el valor asociado de la instrucción y haremos un push del eregistro \textbf{EIR}. A continuación se presenta el arbol de decodificación\\
+	
+\noindent\makebox[\textwidth]{
+\begin{tikzpicture}[->, sibling distance = 1cm]
+\node{INSTRUCTION}
+	child{node{0}
+		child{node{00}
+		    child{node{}
+		        child{node{}
+		            child{node{}
+		                child{node{EXIT}}}}}
+		    child[missing]
+		    child[missing]}      
+		child[missing]
+		child[missing]
+		child{node{01}
+			child{node{010}
+				child{node{0100}
+					child{node{01000}
+							child{node{COPY}}}
+					child{node{01001}
+							child{node{ADD}}}}
+				child[missing]
+				child{node{0101}
+					child{node{01010}
+							child{node{SUB}}}
+					child{node{01011}
+							child{node{AND}}}}}
+			child[missing]
+			child[missing]
+			child{node{011}
+				child{node{0110}
+					child{node{01100}
+							child{node{NOT}}}
+					child{node{01101}
+							child{node{STC}}}}}}}
+	child[missing]
+	child[missing]
+	child[missing]
+	child[missing]
+	child[missing]
+	child[missing]
+	child[missing]
+	child{node{1}
+		child{node{10}
+			child{node{100}
+				child{node{1000}
+					child{node{}
+						child{node{LOA}}}}
+				child{node{1001}
+					child{node{}
+						child{node{LOAI}}}}}
+			child[missing]
+			child{node{101}
+				child{node{1010}
+					child{node{}
+						child{node{STO}}}}
+				child{node{1011}
+					child{node{}
+						child{node{STOI}}}}}}
+		child[missing]
+		child[missing]
+		child[missing]
+		child{node{11}
+			child{node{110}
+				child{node{1100}
+					child{node{}
+						child{node{BRI}}}}
+				child{node{1101}
+					child{node{}
+						child{node{BRC}}}}}
+			child[missing]
+			child{node{111}
+				child{node{1110}
+					child{node{}
+						child{node{BRZ}}}}
+				child[missing]}}}
+\end{tikzpicture}
+}
+	\section{Tabla de subrutinas}
+\begin{center}
+\begin{adjustbox}{center}
+\begin{tabular}{ccccc}
+\ChangeRT{1.25pt}
+\textbf{Etiqueta}     & \textbf{Librería}     & \textbf{Entrada}      & \textbf{Funcionalidad}& \textbf{Salida}  \\ \ChangeRT{1.25pt}
+
+\multicolumn{1}{c|}{FLAGSNC} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{SR} & \multicolumn{1}{c|}{Obtención flags ( No modifica acarreo)} & D6  \\ \hline
+
+\multicolumn{1}{c|}{FLAGS} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{SR} & \multicolumn{1}{c|}{Obtención flags (modifica acarreo)} & D6  \\ \hline
+
+\multicolumn{1}{c|}{GET\_A} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{EIR} & \multicolumn{1}{c|}{Obtención parámetro A} & A0 \\ \hline
+
+\multicolumn{1}{c|}{GET\_B} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{EIR} & \multicolumn{1}{c|}{Obtención parámetro B} & A1 \\ \hline
+
+\multicolumn{1}{c|}{GET\_C} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{EIR} & \multicolumn{1}{c|}{Obtención parámetro C} & A2 \\ \hline
+
+\multicolumn{1}{c|}{GET\_K} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{EIR} & \multicolumn{1}{c|}{Obtención de la constante \textbf{k}} & D2 \\ \hline
+
+\multicolumn{1}{c|}{GET\_M} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{EIR} & \multicolumn{1}{c|}{Obtención de la constante \textbf{M}} & D2 \\ \hline
+
+\multicolumn{1}{c|}{GET\_I} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{EIR} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Obtención del registro indicado \\ por el parámetro I\\ $I = 0 \implies TO$ \\ $I = 1 \implies T1$ \end{tabular}} & A4 \\ \hline
+
+\multicolumn{1}{c|}{GET\_J} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{EIR} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Obtención del registro indicado \\ por el parámetro J\\ $J = 0 \implies B6$ \\ $J = 1 \implies B7$ \end{tabular}} & A4 \\ \hline
+
+\multicolumn{1}{c|}{REGDEC} & \multicolumn{1}{c|}{NO} & \multicolumn{1}{c|}{D4} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Obtención del registro mencionado \\ en los parámetros A,B y C \end{tabular}} & A4 \\ \hline
+
+\multicolumn{1}{c|}{DECOD} & \multicolumn{1}{c|}{SI} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}SUBQ.W \#2,SP \\ MOVE.W EIR,-(SP)\end{tabular}} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Decodificacion de la \\instrucción en EIR \end{tabular}} & {\begin{tabular}[c]{@{}c@{}} ADDQ.W \#2,SP \\ MOVE.W (SP)+,D1\end{tabular}} \\ 
+\end{tabular}
+\end{adjustbox}
+\end{center}
+	\section{Tabla de registros del 68K}
+    \begin{center}
+\begin{tabular}{ccc}
+\ChangeRT{1.25pt}
+
+\textbf{Registros}    & \textbf{Función}      & \textbf{Utilización} \\ \ChangeRT{1.25pt}
+
+\multicolumn{1}{c|}{A0} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Cálculo del PC \\ 
+Dirección del eregistro \textless{}a\textgreater{} \end{tabular}} & \begin{tabular}[c]{@{}c@{}}Fase de Fetch \\ Como parámetro \textless{}a\textgreater{} \end{tabular}     \\ \hline
+
+\multicolumn{1}{c|}{A1} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Cálculo de índice de instrucción \\ Dirección del eregistro \textless{}b\textgreater{} \end{tabular}} & \begin{tabular}[c]{@{}c@{}}Salto a la fase de ejecución\\Como parámetro \textless{}b\textgreater{}  \end{tabular}   \\ \hline
+
+\multicolumn{1}{c|}{A2} & \multicolumn{1}{c|}{ Dirección del eregistro \textless{}c\textgreater{}} & Como parámetro \textless{}c\textgreater{}  \\ \hline
+
+\multicolumn{1}{c|}{A3} & \multicolumn{1}{c|}{Edirección M} & Parámetro M   \\ \hline
+
+\multicolumn{1}{c|}{A4} & \multicolumn{1}{c|}{Masking} & Cálculo de registros \\ \hline
+
+\multicolumn{1}{c|}{D0} & \multicolumn{1}{c|}{Contenido del eregistro \textless{}a\textgreater{}} & Como parametro \textless{}a\textgreater{} \\ \hline
+
+\multicolumn{1}{c|}{D1} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Indice del salto a instrucción \\ Contenido del eregistro \textless{}b\textgreater{} \end{tabular}} & \begin{tabular}[c]{@{}c@{}}Salto a la fase de ejecución \\ Como parámetro \textless{}b\textgreater \end{tabular} \\ \hline
+
+\multicolumn{1}{c|}{D2} & \multicolumn{1}{c|}{\begin{tabular}[c]{@{}c@{}}Almacenar el parámetro K \\ Almacenar el parámetro M \end{tabular} } & Ejecución de instrucciones \\ \hline
+
+\multicolumn{1}{c|}{D3} & \multicolumn{1}{c|}{Calculo de saltos} & BRC, BRZ \\ \hline
+
+\multicolumn{1}{c|}{D4} & \multicolumn{1}{c|}{Masking} & GET\_A, GET\_B, GET\_C GET\_K, REGDEC  \\ \hline
+
+\multicolumn{1}{c|}{D5} & \multicolumn{1}{c|}{Flag Z} &  \\ \cline{1-2}
+\multicolumn{1}{c|}{D6} & \multicolumn{1}{c|}{Flag N} & Cálculo de Flags\\ \cline{1-2}
+\multicolumn{1}{c|}{D7} & \multicolumn{1}{c|}{Flag C} &                  
+\end{tabular}
+\end{center}
+\noindent En este apartado cabe comentar un par de puntos que creemos importantes. Aunque gran parte de las subrutinas se pudiesen hacer de libreria ( usando la pila ) creemos que la molestia de trabajar supera al beneficio de tener más registros para el usuario. De esta manera, hemos intenado usar la pila lo menos posible usando, por ejemplo, los registros \textbf{D5, D6 \& D7} únicamente para los flags. Haciendolo de esta manera hacemos que el programa sea mucho más simple de comprende y tenemos el efecto secundario de no tener que preocuparnos de saber si ese registro aya esta siendo usado por otra rutina .
+\newpage
+	
+	\section{Conjunto de pruebas}
+Para comprobar que nuestra emulación se ejecuta correctamente, hemos decidido probar  con  un  código  que  utilizase  el  resto  de  instrucciones  que  quedan  por  ejecutar  en las dos pruebas proporcionadas en la práctica.
+\begin{center}
+\begin{adjustbox}{center}
+\begin{tabular}{cccc}
+\ChangeRT{1.25pt}
+\textbf{@PS-ECI}            & \textbf{Ensamblador}           & \textbf{Codificación}                    & \textbf{Hex} \\ \ChangeRT{1.25pt}
+\multicolumn{1}{c|}{0:}  & \multicolumn{1}{c|}{LOA C,T0} & \multicolumn{1}{c|}{1000 0000 0000 1100} & 800C         \\ \hline
+\multicolumn{1}{c|}{1:}  & \multicolumn{1}{c|}{LOA D,T1}       & \multicolumn{1}{c|}{1000 1000 0000 1101} & 880D        \\ \hline
+\multicolumn{1}{c|}{2:}  & \multicolumn{1}{c|}{AND T0,T1,T0}  & \multicolumn{1}{c|}{0101 1000 0000 1000} & 5808         \\ \hline
+\multicolumn{1}{c|}{3:}  & \multicolumn{1}{c|}{NOT T0} & \multicolumn{1}{c|}{0110 0000 0000 0000} & 6000         \\ \hline
+\multicolumn{1}{c|}{4:}  & \multicolumn{1}{c|}{SUB T0,T0,T0}     & \multicolumn{1}{c|}{0101 0000 0000 0000} & 5000         \\ \hline
+\multicolumn{1}{c|}{5:}  & \multicolumn{1}{c|}{BRC 7}       & \multicolumn{1}{c|}{1101 0000 0000 0111} & D007         \\ \hline
+\multicolumn{1}{c|}{6:}  & \multicolumn{1}{c|}{EXIT}  & \multicolumn{1}{c|}{0000 0000 0000 0000} & 0000        \\ \hline
+\multicolumn{1}{c|}{7:}  & \multicolumn{1}{c|}{STC \#4,T0}       & \multicolumn{1}{c|}{0110 1000 0010 0000} & 6820         \\ \hline
+\multicolumn{1}{c|}{8:}  & \multicolumn{1}{c|}{ADD T0,T1,T1}       & \multicolumn{1}{c|}{0100 1000 0000 1001} & 4809         \\ \hline
+\multicolumn{1}{c|}{9:}  & \multicolumn{1}{c|}{COPY T1,B6}       & \multicolumn{1}{c|}{0100 0000 0000 1110} & 400E         \\ \hline
+\multicolumn{1}{c|}{A:}  & \multicolumn{1}{c|}{STOI (B6)}       &
+\multicolumn{1}{c|}{1011 0000 0000 0000} & B000         \\ \hline
+\multicolumn{1}{c|}{B:} & \multicolumn{1}{c|}{EXIT}         &\multicolumn{1}{c|}{0000 0000 0000 0000} & 0000         \\ \hline
+\multicolumn{1}{c|}{C:} & \multicolumn{1}{c|}{000A}         & \multicolumn{1}{c|}{0000 0000 0000 1010} & 000A         \\ \hline
+\multicolumn{1}{c|}{D:} & \multicolumn{1}{c|}{0002}         & \multicolumn{1}{c|}{0000 0000 0000 0002} & 0002         
+\end{tabular}
+\end{adjustbox}
+\end{center}
+Este programa no tiene 'sentido' ya que solo queremos probar que las instrucciones que no se habian tratado antes funcionen. Tras la ejecución de este programa, en la dirección @\$100C debería haber un 4
+	\section{Conclusiones}
+	\noindent Como conclusión podemos decir que esta práctica nos ha ayudado a terminar de asimilar conceptos previamente adquiridos en la asignatura, ya que a la hora de la prácitca se ve la idea con mayor claridad. Además, la práctica nos ha servido de ayuda para estudiar de cara a los exámenes.\\
+	
+	\noindent Como un plus, esta práctica nos ha permitido prácticar \LaTeX{} y algo de programación. La documentación como se ha mencionado previamente, esta hecha por completo en \LaTeX{}, ademas Rubén Palmer Pérez programó un pequeño projecto en java para poder hacer programas de prueba de la máquina. El código fuente del programa y del documento de \LaTeX{} se puede encontrar \textbf{\href{https://github.com/Zygmut/PRAFIN20}{AQUI}}
+	
+	\section{Código fuente}
+	\addtolength{\oddsidemargin}{-.175in}
+	\addtolength{\evensidemargin}{-.875in}
+	\addtolength{\textwidth}{1.75in}
+
+\begin{lstlisting}
+*-----------------------------------------------------------
+* Title      : PRAFIN20
+* Written by : Mateu Segui Vives, Ruben Palmer Perez
+* Date       : 20/05/2020
+* Description: Emulador de la PS-ECI
+*-----------------------------------------------------------
+    ORG $1000
+EPROG: DC.W $8810,$400A,$E00D,$688E,$9000,$4003,$E00D,$6804
+       DC.W $6FFD,$48A4,$495B,$E00D,$C009,$4020,$A012,$0000
+       DC.W $0004,$0003,$0000
+EIR:   DC.W 0 ;eregistro de instruccion
+EPC:   DC.W 0 ;econtador de programa
+ET0:   DC.W 0 ;eregistro T0
+ET1:   DC.W 0 ;eregistro T1
+ER2:   DC.W 0 ;eregistro R2
+ER3:   DC.W 0 ;eregistro R3
+ER4:   DC.W 0 ;eregistro R4
+ER5:   DC.W 0 ;eregistro R5
+EB6:   DC.W 0 ;eregistro B6
+EB7:   DC.W 0 ;eregistro B7
+ESR:   DC.W 0 ;eregistro de estado (00000000 00000ZNC)
+
+
+START:
+    CLR.W EPC
+
+FETCH:
+    ;--- IFETCH: INICIO FETCH
+        ;*** En esta seccion debeis introducir el codigo necesario para cargar
+        ;*** en el EIR la siguiente instruccion a ejecutar, indicada por el EPC
+	    ;*** y dejar listo el EPC para que apunte a la siguiente instruccion
+	
+        MOVE.W EPC, A0
+        ADD.W A0,A0     
+        MOVE.W EPROG(A0),EIR
+        ADDQ.W #1,EPC
+
+    ;--- FFETCH: FIN FETCH
+    
+    ;--- IBRDECOD: INICIO SALTO A DECOD
+        ;*** En esta seccion debeis preparar la pila para llamar a la subrutina
+        ;*** DECOD, llamar a la subrutina, y vaciar la pila correctamente,
+        ;*** almacenando el resultado de la decodificacion en D1
+
+        SUBQ.W #2, SP 
+        MOVE.W EIR,-(SP) 
+        JSR DECOD
+        ADDQ.W #2,SP
+	MOVE.W (SP)+,D1
+
+    ;--- FBRDECOD: FIN SALTO A DECOD
+    
+    ;--- IBREXEC: INICIO SALTO A FASE DE EJECUCION
+        ;*** Esta seccion se usa para saltar a la fase de ejecucion
+        ;*** NO HACE FALTA MODIFICARLA
+
+    MULU #6,D1
+    MOVEA.L D1,A1
+    JMP JMPLIST(A1)
+JMPLIST:
+    JMP EEXIT 
+    JMP ECOPY 
+    JMP EADD 
+    JMP ESUB 
+    JMP EAND 
+    JMP ENOT 
+    JMP ESTC 
+    JMP ELOA 
+    JMP ELOAI 
+    JMP ESTO 
+    JMP ESTOI 
+    JMP EBRI 
+    JMP EBRC 
+    JMP EBRZ    
+
+    ;--- FBREXEC: FIN SALTO A FASE DE EJECUCION
+    
+    ;--- IEXEC: INICIO EJECUCION
+        ;*** En esta seccion debeis implementar la ejecucion de cada einstr.
+
+EEXIT:
+	SIMHALT 
+	
+ECOPY:
+	JSR GET_B 
+	JSR GET_C 
+	MOVE.W (A1),D1
+	MOVE.W D1, (A2)
+	JSR FLAGSNC
+	BRA FETCH
+
+EADD:
+	JSR GET_A 
+	JSR GET_B 
+	JSR GET_C 
+	MOVE.W (A0),D0
+	MOVE.W (A1),D1
+	ADD.W D0,D1
+	JSR FLAGS
+	MOVE.W D1,(A2)
+	BRA FETCH
+
+ESUB:
+	JSR GET_A 
+	JSR GET_B 
+	JSR GET_C 
+	MOVE.W (A0),D0 
+	MOVE.W (A1),D1 
+	NEG.W D1
+	ADD.W D0,D1
+	JSR FLAGS
+	MOVE.W D1,(A2)
+	BRA FETCH
+
+EAND:
+	JSR GET_A 
+	JSR GET_B 
+	JSR GET_C 
+	MOVE.W (A0),D0
+	MOVE.W (A1),D1
+	AND.W D0,D1
+	JSR FLAGSNC
+	MOVE.W D1,(A2)
+	BRA FETCH
+
+ENOT:
+	JSR GET_C 
+	MOVE.W (A2),D0
+	NOT.W D0
+	JSR FLAGSNC
+	MOVE.W D0,(A2)
+	BRA FETCH
+	
+ESTC:
+	JSR GET_K 
+	JSR GET_C 
+	MOVE.W D2,(A2)
+	JSR FLAGSNC
+	BRA FETCH
+
+ELOA: 
+	JSR GET_I 
+	MOVE.W EIR, D2
+	AND.W #$00FF, D2 ;Sacar M 
+	MOVE.W D2,A3
+	ADD.W A3,A3
+	MOVE.W EPROG(A3),(A4)
+	JSR FLAGSNC
+	BRA FETCH
+
+ELOAI:
+	JSR GET_J 
+	MOVE.W (A4),A4
+	ADD.W A4,A4
+	MOVE.W EPROG(A4),ET0
+	JSR FLAGSNC
+	BRA FETCH
+
+ESTO:
+	JSR GET_I
+	MOVE.W EIR, D2
+	AND.W #$00FF, D2
+	MOVE.W D2,A3
+	ADD.W A3,A3
+	MOVE.W (A4),EPROG(A3)
+	BRA FETCH
+
+ESTOI:
+	JSR GET_J 
+	MOVE.W (A4),A4
+	ADD.W A4,A4
+	MOVE.W (ET0),EPROG(A4)
+	BRA FETCH
+
+EBRI:
+	MOVE.W EIR, D2
+	AND.W #$00FF, D2
+	MOVE.W D2,EPC
+	BRA FETCH
+
+EBRC:
+	MOVE.W ESR, D3
+	BTST #0, D3 ;Test flag C
+	BEQ FETCH 
+	MOVE.W EIR, D2
+	AND.W #$00FF, D2
+	MOVE.W D2,EPC
+	BRA FETCH
+
+EBRZ:
+	MOVE.W ESR, D3
+	BTST #2, D3 ;Test flag C
+	BEQ FETCH 
+	MOVE.W EIR, D2
+	AND.W #$00FF, D2
+	MOVE.W D2,EPC
+	BRA FETCH
+
+    ;--- FEXEC: FIN EJECUCION
+
+    ;--- ISUBR: INICIO SUBRUTINAS
+        ;*** Aqui debeis incluir las subrutinas que necesite vuestra solucion
+        ;*** SALVO DECOD, que va en la siguiente seccion
+
+;Con respecto a los flags hemos decidido hacer la siguiente accion:
+;Una subrutina para calcular los flags Z & N y otra Ãºnicamente para
+;el flag C. De esta manera para actualizar todos los flags actuali-
+;zaremos Z&N y luego actualizaremos Z 
+
+FLAGSNC:
+	MOVE.W SR, D5  
+	MOVE.W D5, D6 
+	AND.W #4,D5   ;Flag Z
+	AND.W #8,D6   ;Flag N
+	LSR.W #2,D6   
+	OR.W D5,D6    
+	MOVE.W D6,ESR 
+	RTS
+
+FLAGS:
+	MOVE.W SR, D7
+	JSR FLAGSNC
+	AND.W #1,D7 ;Flag C
+  	OR.W D7,D6  ;D6 <- ESR con Z & N
+    MOVE.W D6,ESR
+    RTS
+
+GET_A: ;Pone en el registro A0 la direcciÃ³n del operando a
+
+	MOVE.W #$1C0, D4		
+	AND.W EIR, D4
+	LSR #6,D4
+	JSR REGDEC
+	MOVE.W A4,A0
+	RTS	
+
+GET_B: ;Pone en el registro A1 la direcciÃ³n del operando b
+
+	MOVE.W #$38, D4	
+	AND.W EIR, D4
+	LSR #3, D4
+	JSR REGDEC
+	MOVE.W A4,A1
+	RTS
+
+GET_C: ;Pone en el registro A2 la direcciÃ³n del operando c
+
+	MOVE.W #$7, D4	
+	AND.W EIR, D4
+	JSR REGDEC
+	MOVE.W A4,A2
+	RTS
+
+GET_K: ;Pone en el registro D2 el valor k con extensiÃ³n
+
+    MOVE.W #$7F8, D4	
+	AND.W EIR, D4
+	LSR #3, D4
+	EXT.W D4
+	MOVE.W D4,D2
+	RTS
+
+GET_M: ;Pone en el registro D2 el valor M
+
+	MOVE.W EIR,D2
+	AND.W #$00FF,D2
+	RTS	
+
+GET_I: ;Pone en el registro A4 la direcciÃ³n de T1 o T0
+
+	BTST #11, EIR ;Mirar si es T1 o T0
+	BEQ RT0
+RT1:	
+	LEA.L ET1,A4
+	RTS
+RT0:
+	LEA.L ET0,A4
+	RTS
+
+GET_J: ;Pone en el registro A4 la direcciÃ³n de B6 o B7
+
+	BTST #11, EIR ;Mirar si es B6 o B7
+	BEQ RB6
+RB7:	
+	LEA.L EB7,A4
+	RTS
+RB6:
+	LEA.L EB6,A4
+	RTS
+	
+REGDEC: ;Decodifica los 3 bits menos significativos 
+	;del registro D4 para determinar que 
+	;registro emulado es
+
+	BTST.L #2,D4
+	BEQ R0
+R1:
+	BTST.L #1,D4
+	BEQ R10
+R11:
+	BTST.L #0,D4
+	BEQ R110
+R111: ;EB7
+	LEA.L EB7,A4
+	RTS
+R110: ;EB6
+	LEA.L EB6,A4
+	RTS	
+R10:
+	BTST.L #0,D4
+	BEQ R100
+R101: ;ER5
+	LEA.L ER5,A4
+	RTS
+R100: ;ER4
+	LEA.L ER4,A4
+	RTS
+R0:
+	BTST.L #1,D4
+	BEQ R00
+R01:
+	BTST.L #0,D4
+	BEQ R010
+R011: ;ER3
+	LEA.L ER3,A4
+	RTS		
+R010: ;ER2
+	LEA.L ER2,A4
+	RTS
+R00:
+	BTST.L #0,D4
+	BEQ R000
+R001: ;ET1
+	LEA.L ET1,A4
+	RTS
+R000: ;ET0
+	LEA.L ET0,A4
+	RTS
+
+    ;--- FSUBR: FIN SUBRUTINAS
+
+    ;--- IDECOD: INICIO DECOD
+        ;*** Tras la etiqueta DECOD, debeis implementar la subrutina de 
+        ;*** decodificacion, que debera ser de libreria, siguiendo la interfaz
+        ;*** especificada en el enunciado
+
+DECOD:
+	BTST.B #7,4(SP)
+	BEQ IN0
+IN1:
+	BTST.B #6,4(SP)
+	BEQ IN10
+IN11:
+	BTST.B #5,4(SP)
+	BEQ IN110
+IN1110: ;BRZ
+	MOVE.W #13,6(SP)		
+	RTS
+IN110:
+	BTST.B #4,4(SP)
+	BEQ IN1100
+IN1101: ;BRC
+	MOVE.W #12,6(SP)
+	RTS
+IN1100: ;BRI
+	MOVE.W #11,6(SP)
+	RTS
+IN10:
+	BTST.B #5,4(SP)
+	BEQ IN100
+IN101:
+	BTST.B #4,4(SP)
+	BEQ IN1010
+IN1011: ;STOI
+	MOVE.W #10,6(SP)
+	RTS
+IN1010: ;STO
+	MOVE.W #9,6(SP)
+	RTS
+IN100:
+	BTST.B #4,4(SP)
+	BEQ IN1000
+IN1001: ;LOAI
+	MOVE.W #8,6(SP)
+	RTS
+IN1000: ;LOA
+	MOVE.W #7,6(SP)
+	RTS
+IN0:
+	BTST.B #6,4(SP)
+	BEQ IN00
+IN01:
+	BTST.B #5,4(SP)
+	BEQ IN010
+IN0110: 
+	BTST.B #3,4(SP)
+	BEQ IN01100
+IN01101: ;STC
+	MOVE.W #6,6(SP)
+	RTS
+IN01100: ;NOT
+	MOVE.W #5,6(SP)
+	RTS
+IN010:
+	BTST.B #4,4(SP)
+	BEQ IN0100
+IN0101:
+	BTST.B #3,4(SP)
+	BEQ IN01010
+IN01011: ;AND
+	MOVE.W #4,6(SP)
+	RTS
+IN01010: ;SUB
+	MOVE.W #3,6(SP)
+	RTS
+IN0100:
+	BTST.B #3,4(SP)
+	BEQ IN01000
+IN01001: ;ADD
+	MOVE.W #2,6(SP)
+	RTS
+IN01000: ;COPY
+	MOVE.W #1,6(SP)
+	RTS
+IN00: ;EXIT
+	MOVE.W #0,6(SP)
+	RTS	
+
+    ;--- FDECOD: FIN DECOD
+	
+    END START
+
+\end{lstlisting}
+\end{document}
