@@ -34,7 +34,7 @@
 	\texttt{43474448D}
 	\and
 	\\Curso 2019-2020\\
-	\texttt{Estructura de Computadores I - Grupo (\textbf{numero de grupo})}
+	\texttt{Estructura de Computadores I - Grupo (\textbf{1})}
 }
 \date{\today}
 
@@ -44,7 +44,31 @@
 \rfoot{\thepage}
 
 \begin{document}
-	\maketitle
+	\begin{titlepage}
+	\centering
+	\includegraphics[width=0.15\textwidth]{UIB.png}\par\vspace{1cm}
+	{\scshape\LARGE Universitat de les Illes Balears \par}
+	\vspace{1cm}
+	{\scshape\Large Práctica final EC\par}
+	\vspace{1.5cm}
+	{\huge\bfseries Práctica PS-ECI: Procesador Simple\par}
+	\vspace{2cm}
+	{\large\begin{multicols}{2}
+	Seguí Vives, Mateu\\
+	\textit{mateufassers6b@gmail.com}\\
+	\texttt{20549548R}
+	\vfill\null
+	\columnbreak
+	Palmer Pérez, Rubén\\
+	\textit{ruben.palmer1@estudiant.uib.cat}\\
+	\texttt{43474448D}
+	\end{multicols}\par}
+	\vfill
+
+
+% Bottom of the page
+	{\large \texttt{Grupo 01} \\\today\par}
+    \end{titlepage}
 	\thispagestyle{empty}
 	\newpage
 	
@@ -67,7 +91,7 @@
 		\item \textbf{ESR -} Registro de estado que guarda los flags \textit{Zero}, \textit{Negative} y \textit{Carry} tal que: (00000000 00000ZNC).	
 	\end{itemize}	
 	
-	\subsection{Ejecución de instrucciones}
+	\section{Descripción general}
 	Debemos simular cada uno de los pasos que una maquina debe hacer a la hora de ejecutar cualquier instrucción. Será necesario, pues, emular la fase de fect, decodificación y la propia ejecución
 	\subsubsection{\textit{fetch}}
 	
@@ -99,7 +123,8 @@
 	    \item \textbf{13. BRZ: }Branch condicional dado por una edirección \textbf{M} y el eflag \textbf{Z}
 	\end{itemize}
 	\section{Rutina de decodificación}
-	Para decodificar las instrucciones, usamos una subrutina de libreria \textbf{DECOD} que usa la instrucción \textbf{BTST} para mirar el valor del bit actual en orden del más significativo al menos significativo. Dependiendo del valor del bit, se hace el salto correspondiente a la siguiente etiqueta hasta llegar a la que coincide con el valor de la instrucción. Previamente, se reservará un espacio en la pila para que la subrutina nos devuelva el valor asociado de la instrucción y haremos un push del eregistro \textbf{EIR}. A continuación se presenta el arbol de decodificación\\
+	Para decodificar las instrucciones, usamos una subrutina de libreria \textbf{DECOD} que usa la instrucción \textbf{BTST} para mirar el valor del bit actual en orden del más significativo al menos significativo. Dependiendo del valor del bit, se hace el salto correspondiente a la siguiente etiqueta hasta llegar a la que coincide con el valor de la instrucción. Previamente, se reservará un espacio en la pila para que la subrutina nos devuelva el valor asociado de la instrucción y haremos un push del eregistro \textbf{EIR}. A continuación se presenta el arbol de decodificación
+	\vspace{1cm}
 	
 \noindent\makebox[\textwidth]{
 \begin{tikzpicture}[->, sibling distance = 1cm]
@@ -177,8 +202,9 @@
 						child{node{BRZ}}}}
 				child[missing]}}}
 \end{tikzpicture}
-}
-	\section{Tabla de subrutinas}
+}\par
+
+\section{Tabla de subrutinas}
 \begin{center}
 \begin{adjustbox}{center}
 \begin{tabular}{ccccc}
@@ -246,7 +272,7 @@ Dirección del eregistro \textless{}a\textgreater{} \end{tabular}} & \begin{tabu
 \newpage
 	
 	\section{Conjunto de pruebas}
-Para comprobar que nuestra emulación se ejecuta correctamente, hemos decidido probar  con  un  código  que  utilizase  el  resto  de  instrucciones  que  quedan  por  ejecutar  en las dos pruebas proporcionadas en la práctica.
+Para comprobar que nuestra emulación se ejecuta correctamente ibamos a hacer una prueba por cada instrucción que falta por usar, ya que tanto el programa de prueba como el programa principal compilan y funcionan como se espera. Sin embargo acabamos creado  un  código  que  utilizase  estas instrucciones no usadas para hacer el conjunto de pruebas más conciso.
 \begin{center}
 \begin{adjustbox}{center}
 \begin{tabular}{cccc}
@@ -269,8 +295,9 @@ Para comprobar que nuestra emulación se ejecuta correctamente, hemos decidido p
 \multicolumn{1}{c|}{D:} & \multicolumn{1}{c|}{0002}         & \multicolumn{1}{c|}{0000 0000 0000 0002} & 0002         
 \end{tabular}
 \end{adjustbox}
-\end{center}
-Este programa no tiene 'sentido' ya que solo queremos probar que las instrucciones que no se habian tratado antes funcionen. Tras la ejecución de este programa, en la dirección @\$100C debería haber un 4
+\end{center}\par
+\noindent Este programa no tiene 'sentido' ya que solo queremos probar que las instrucciones que no se habian tratado antes funcionen. Tras su ejecución, en la dirección @\$100C debería haber un 4Hex
+
 	\section{Conclusiones}
 	\noindent Como conclusión podemos decir que esta práctica nos ha ayudado a terminar de asimilar conceptos previamente adquiridos en la asignatura, ya que a la hora de la prácitca se ve la idea con mayor claridad. Además, la práctica nos ha servido de ayuda para estudiar de cara a los exámenes.\\
 	
@@ -281,7 +308,7 @@ Este programa no tiene 'sentido' ya que solo queremos probar que las instruccion
 	\addtolength{\evensidemargin}{-.875in}
 	\addtolength{\textwidth}{1.75in}
 
-\begin{lstlisting}
+\begin{verbatim}
 *-----------------------------------------------------------
 * Title      : PRAFIN20
 * Written by : Mateu Segui Vives, Ruben Palmer Perez
@@ -487,7 +514,7 @@ EBRZ:
         ;*** SALVO DECOD, que va en la siguiente seccion
 
 ;Con respecto a los flags hemos decidido hacer la siguiente accion:
-;Una subrutina para calcular los flags Z & N y otra Ãºnicamente para
+;Una subrutina para calcular los flags Z & N y otra únicamente para
 ;el flag C. De esta manera para actualizar todos los flags actuali-
 ;zaremos Z&N y luego actualizaremos Z 
 
@@ -506,10 +533,10 @@ FLAGS:
 	JSR FLAGSNC
 	AND.W #1,D7 ;Flag C
   	OR.W D7,D6  ;D6 <- ESR con Z & N
-    MOVE.W D6,ESR
-    RTS
+    	MOVE.W D6,ESR
+    	RTS
 
-GET_A: ;Pone en el registro A0 la direcciÃ³n del operando a
+GET_A: ;Pone en el registro A0 la dirección del operando a
 
 	MOVE.W #$1C0, D4		
 	AND.W EIR, D4
@@ -518,7 +545,7 @@ GET_A: ;Pone en el registro A0 la direcciÃ³n del operando a
 	MOVE.W A4,A0
 	RTS	
 
-GET_B: ;Pone en el registro A1 la direcciÃ³n del operando b
+GET_B: ;Pone en el registro A1 la dirección del operando b
 
 	MOVE.W #$38, D4	
 	AND.W EIR, D4
@@ -527,7 +554,7 @@ GET_B: ;Pone en el registro A1 la direcciÃ³n del operando b
 	MOVE.W A4,A1
 	RTS
 
-GET_C: ;Pone en el registro A2 la direcciÃ³n del operando c
+GET_C: ;Pone en el registro A2 la dirección del operando c
 
 	MOVE.W #$7, D4	
 	AND.W EIR, D4
@@ -535,9 +562,9 @@ GET_C: ;Pone en el registro A2 la direcciÃ³n del operando c
 	MOVE.W A4,A2
 	RTS
 
-GET_K: ;Pone en el registro D2 el valor k con extensiÃ³n
+GET_K: ;Pone en el registro D2 el valor k con extensión
 
-    MOVE.W #$7F8, D4	
+    	MOVE.W #$7F8, D4	
 	AND.W EIR, D4
 	LSR #3, D4
 	EXT.W D4
@@ -550,7 +577,7 @@ GET_M: ;Pone en el registro D2 el valor M
 	AND.W #$00FF,D2
 	RTS	
 
-GET_I: ;Pone en el registro A4 la direcciÃ³n de T1 o T0
+GET_I: ;Pone en el registro A4 la dirección de T1 o T0
 
 	BTST #11, EIR ;Mirar si es T1 o T0
 	BEQ RT0
@@ -561,7 +588,7 @@ RT0:
 	LEA.L ET0,A4
 	RTS
 
-GET_J: ;Pone en el registro A4 la direcciÃ³n de B6 o B7
+GET_J: ;Pone en el registro A4 la dirección de B6 o B7
 
 	BTST #11, EIR ;Mirar si es B6 o B7
 	BEQ RB6
@@ -714,5 +741,6 @@ IN00: ;EXIT
 	
     END START
 
-\end{lstlisting}
+
+\end{verbatim}
 \end{document}

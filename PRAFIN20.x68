@@ -203,7 +203,7 @@ EBRZ:
         ;*** SALVO DECOD, que va en la siguiente seccion
 
 ;Con respecto a los flags hemos decidido hacer la siguiente accion:
-;Una subrutina para calcular los flags Z & N y otra 煤nicamente para
+;Una subrutina para calcular los flags Z & N y otra 鷑icamente para
 ;el flag C. De esta manera para actualizar todos los flags actuali-
 ;zaremos Z&N y luego actualizaremos Z 
 
@@ -225,7 +225,7 @@ FLAGS:
     	MOVE.W D6,ESR
     	RTS
 
-GET_A: ;Pone en el registro A0 la direcci贸n del operando a
+GET_A: ;Pone en el registro A0 la direcci髇 del operando a
 
 	MOVE.W #$1C0, D4		
 	AND.W EIR, D4
@@ -234,7 +234,7 @@ GET_A: ;Pone en el registro A0 la direcci贸n del operando a
 	MOVE.W A4,A0
 	RTS	
 
-GET_B: ;Pone en el registro A1 la direcci贸n del operando b
+GET_B: ;Pone en el registro A1 la direcci髇 del operando b
 
 	MOVE.W #$38, D4	
 	AND.W EIR, D4
@@ -243,7 +243,7 @@ GET_B: ;Pone en el registro A1 la direcci贸n del operando b
 	MOVE.W A4,A1
 	RTS
 
-GET_C: ;Pone en el registro A2 la direcci贸n del operando c
+GET_C: ;Pone en el registro A2 la direcci髇 del operando c
 
 	MOVE.W #$7, D4	
 	AND.W EIR, D4
@@ -251,7 +251,7 @@ GET_C: ;Pone en el registro A2 la direcci贸n del operando c
 	MOVE.W A4,A2
 	RTS
 
-GET_K: ;Pone en el registro D2 el valor k con extensi贸n
+GET_K: ;Pone en el registro D2 el valor k con extensi髇
 
     	MOVE.W #$7F8, D4	
 	AND.W EIR, D4
@@ -266,7 +266,7 @@ GET_M: ;Pone en el registro D2 el valor M
 	AND.W #$00FF,D2
 	RTS	
 
-GET_I: ;Pone en el registro A4 la direcci贸n de T1 o T0
+GET_I: ;Pone en el registro A4 la direcci髇 de T1 o T0
 
 	BTST #11, EIR ;Mirar si es T1 o T0
 	BEQ RT0
@@ -277,7 +277,7 @@ RT0:
 	LEA.L ET0,A4
 	RTS
 
-GET_J: ;Pone en el registro A4 la direcci贸n de B6 o B7
+GET_J: ;Pone en el registro A4 la direcci髇 de B6 o B7
 
 	BTST #11, EIR ;Mirar si es B6 o B7
 	BEQ RB6
@@ -429,3 +429,8 @@ IN00: ;EXIT
     ;--- FDECOD: FIN DECOD
 	
     END START
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
