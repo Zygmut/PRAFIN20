@@ -99,9 +99,7 @@
 	
 	\newpage
 	\subsubsection{\textit{decodificación}}
-	En la decodoficación de la instrucción se mira el valor de la instrucción bit a bit de izquierda a derecha y según esos valores va saltando  a la instrucción correspondiente. 
-
-	
+Para la fase de decodificación, cogemos la einstrucción contenida en \textbf{EIR} y la sometemos a una serie de \textbf{BTST} hasta que conseguimos identificar la instrucción a realizar .Una vez identificamos que instrucción es, devolvemos un valor que se usará más adelante para ejecutar dicha instrucción.
     
 	\subsubsection{\textit{ejecución}}
 	Según el valor que nos devuelva la fase de \textit{decodificación}, se ejecutara una de las siguientes instrucciones:
@@ -128,7 +126,7 @@
 	
 \noindent\makebox[\textwidth]{
 \begin{tikzpicture}[->, sibling distance = 1cm]
-\node{INSTRUCTION}
+\node{INSTRUCCIÓN}
 	child{node{0}
 		child{node{00}
 		    child{node{}
@@ -296,12 +294,16 @@ Para comprobar que nuestra emulación se ejecuta correctamente ibamos a hacer un
 \end{tabular}
 \end{adjustbox}
 \end{center}\par
-\noindent Este programa no tiene 'sentido' ya que solo queremos probar que las instrucciones que no se habian tratado antes funcionen. Tras su ejecución, en la dirección @\$100C debería haber un 4Hex
+
+\noindent Las primeras instrucciónes, cargan \#\$A y \#2 en \textbf{T0} y \textbf{T1}, respectivamente. Una vez hacemos la \textbf{AND} T0 deberia contenter un \#2Hex donde inmediatamente después lo negamos, metiendo en \textbf{T0} el valor \#\$FFFD. Al restar \textbf{T0} con \textbf{T0} nos da 0 poniendo los flags \textbf{Z} y \textbf{C} a 1, aprovecharemos el flag  \textbf{C} para hacer un salto condicional. La siguiente instrucción es un \textbf{STC} que pone en \textbf{T0} el valor \#4Hex. Justo después, sumamos \textbf{T0} con \textbf{T1} lo que nos devuelve un \#6Hex en \textbf{T1} y copiamos ese valor a \textbf{B6}. Finalmente, Hacemos un \textbf{STOI} con \textbf{B6} lo que nos guarda en la posición C de nuestro eprograma el contenido de \textbf{T0} (\#4Hex)\\
+
+\noindent Este programa no tiene 'sentido' ya que solo queremos probar que las instrucciones que no se habian tratado antes funcionen. Tras su ejecución, en la dirección @\$100C debería haber un 4Hex\par
+
 
 	\section{Conclusiones}
 	\noindent Como conclusión podemos decir que esta práctica nos ha ayudado a terminar de asimilar conceptos previamente adquiridos en la asignatura, ya que a la hora de la prácitca se ve la idea con mayor claridad. Además, la práctica nos ha servido de ayuda para estudiar de cara a los exámenes.\\
 	
-	\noindent Como un plus, esta práctica nos ha permitido prácticar \LaTeX{} y algo de programación. La documentación como se ha mencionado previamente, esta hecha por completo en \LaTeX{}, ademas Rubén Palmer Pérez programó un pequeño projecto en java para poder hacer programas de prueba de la máquina. El código fuente del programa y del documento de \LaTeX{} se puede encontrar \textbf{\href{https://github.com/Zygmut/PRAFIN20}{AQUI}}
+	\noindent Como un plus, esta práctica nos ha permitido prácticar \LaTeX{} y algo de programación. La documentación como se ha mencionado previamente, esta hecha por completo en \LaTeX{}, ademas se programó un pequeño projecto en java para poder hacer programas de prueba de la máquina. El código fuente del programa y del documento de \LaTeX{} se puede encontrar \textbf{\href{https://github.com/Zygmut/PRAFIN20}{AQUI}}
 	
 	\section{Código fuente}
 	\addtolength{\oddsidemargin}{-.175in}
